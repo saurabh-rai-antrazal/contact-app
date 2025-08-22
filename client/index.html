@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Contact App</title>
+  </head>
+  <body>
+    <div class="w-full h-full-view bg-light flex justify-center align-center">
+      <div
+        class="main w-full w-standard h-full h-standard bg-white p-lg border-radius-md main-container"
+      >
+        <nav class="flex justify-space-between align-center">
+          <h1 class="font-lg">Contact App</h1>
+          <button
+            class="circle-button font-xl bg-blue border-radius-full border-none text-white pointer"
+            id="add-contact"
+          >
+            +
+          </button>
+        </nav>
+
+        <div class="content-area mt-md">
+          <div class="left-panel border-blue">
+            <div class="search-container">
+              <div class="searchbar flex px-sm align-center border-bottom-sm">
+                <img src="./assets/search.svg" alt="Search" class="icon">
+                <input
+                  class="w-full border-none pl-sm font-md"
+                  type="text"
+                  placeholder="Search contacts..."
+                  id="search-input"
+                  style="outline: none"
+                />
+              </div>
+            </div>
+            <div class="contact-list" id="contact-list">
+              <div class="loading">Loading contacts...</div>
+            </div>
+          </div>
+
+          <div class="right-panel">
+            <div class="contact-details" id="contact-details">
+              <div class="no-contact-selected">
+                <p class="text-gray">Select a contact to view details</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div
+      class="modal-overlay flex justify-center align-center h-full-view"
+      id="contact-modal"
+    >
+      <div class="modal bg-white border-radius-md p-lg">
+        <div class="mb-lg">
+          <h2 class="font-lg font-weight-bold text-dark" id="modal-title">
+            Edit Contact
+          </h2>
+        </div>
+
+        <form class="flex flex-column" style="gap: 0.75rem" id="contact-form">
+          <!-- Image Upload Section -->
+          <div class="image-upload-section">
+            <div
+              class="image-preview"
+              id="image-preview"
+              onclick="document.getElementById('image-input').click()"
+            >
+              <span id="preview-initials">+</span>
+            </div>
+            <input type="file" id="image-input" accept="image/*" />
+          </div>
+
+          <div class="flex" style="gap: 0.75rem">
+            <div class="form-group">
+              <input
+                type="text"
+                name="firstName"
+                placeholder="First name"
+                class="form-input border-radius-md text"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <input
+                type="text"
+                name="lastName"
+                placeholder="Last name"
+                class="form-input border-radius-md text"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <input
+              type="tel"
+              name="mobileNumber"
+              placeholder="Phone number"
+              class="form-input border-radius-md text"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              class="form-input border-radius-md text"
+              required
+            />
+          </div>
+
+          <div class="flex" style="gap: 0.75rem">
+            <div class="form-group">
+              <input
+                type="text"
+                name="address"
+                placeholder="Address"
+                class="form-input border-radius-md text"
+              />
+            </div>
+            <div class="form-group">
+              <input
+                type="text"
+                name="street"
+                placeholder="Street"
+                class="form-input border-radius-md text"
+              />
+            </div>
+          </div>
+
+          <div class="flex" style="gap: 0.75rem">
+            <div class="form-group">
+              <input
+                type="text"
+                name="state"
+                placeholder="State"
+                class="form-input border-radius-md text"
+              />
+            </div>
+            <div class="form-group">
+              <input
+                type="text"
+                name="country"
+                placeholder="Country"
+                class="form-input border-radius-md text"
+              />
+            </div>
+          </div>
+
+          <div class="flex justify-end" style="gap: 0.75rem; margin-top: 1rem">
+            <button
+              type="button"
+              class="btn btn-cancel text-blue border-none border-radius-md pointer"
+              id="modal-cancel-btn"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="btn btn-save bg-blue text-white border-none border-radius-md pointer"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div
+      class="modal-overlay flex justify-center align-center h-full-view"
+      id="contact-modal"
+    >
+      <div class="modal bg-white border-radius-md p-lg">
+        <div class="mb-lg">
+          <h2 class="font-lg font-weight-bold text-dark" id="modal-title">
+            Edit Address
+          </h2>
+        </div>
+
+        <form class="flex flex-column" style="gap: 0.75rem" id="address-form">
+
+          <div class="form-group">
+            <input
+              type="text"
+              name="street"
+              placeholder="Street"
+              class="form-input border-radius-md text"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <input
+              type="text"
+              name="city"
+              placeholder="City"
+              class="form-input border-radius-md text"
+              required
+            />
+          </div>
+          <div class="flex justify-end" style="gap: 0.75rem; margin-top: 1rem">
+            <button
+              type="button"
+              class="btn btn-cancel text-blue border-none border-radius-md pointer"
+              id="modal-cancel-btn"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="btn btn-save bg-blue text-white border-none border-radius-md pointer"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
