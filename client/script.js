@@ -1,251 +1,112 @@
 // Global variables
 let contacts = [];
-let filteredContacts = [];
 let selectedContact = null;
 let originalMobileNumber = null;
 let selectedImageUrl = null;
 
-// API configuration
-const API_BASE_URL = "http://localhost:4000/api/contacts";
-const API_CONTACT_URL = "http://localhost:4000/api/contact";
+// API URLs
+const API_BASE = "http://localhost:4000/api";
 
-// Initialize the app
+// Initialize app
 document.addEventListener("DOMContentLoaded", function () {
   loadContacts();
   setupEventListeners();
 });
 
-// Load contacts from API
+// Load all contacts
 async function loadContacts() {
   try {
-    const contactList = document.getElementById("contact-list");
-    contactList.innerHTML = '<div class="loading">Loading contacts...</div>';
-
-    const response = await fetch(API_BASE_URL);
+    document.getElementById("contact-list").innerHTML = '<div class="loading">Loading contacts...</div>';
+    
+    const response = await fetch(`${API_BASE}/contacts`);
     const data = await response.json();
 
-    // Transform API data to match our contact structure
-    contacts = data.map((contact) => ({
+    contacts = data.map(contact => ({
       id: contact.id,
       firstName: contact.first_name,
       lastName: contact.last_name || "",
       mobileNumber: contact.mobile_number,
       email: contact.email || "",
-      address: contact.address || "",
-      street: contact.street || "",
-      country: contact.country || "",
+      street_1: contact.street_1 || "",
+      street_2: contact.street_2 || "",
       state: contact.state || "",
+      country: contact.country || "",
       image: contact.image || "",
     }));
 
-    filteredContacts = [...contacts];
-    renderContacts();
+    renderContacts(contacts);
   } catch (error) {
     console.error("Error loading contacts:", error);
-    document.getElementById("contact-list").innerHTML =
-      '<div class="error">Failed to load contacts. Please check your API endpoint and try again.</div>';
+    document.getElementById("contact-list").innerHTML = '<div class="error">Failed to load contacts</div>';
   }
 }
 
-// Add new contact to API
-async function addContactToAPI(contactData) {
-  try {
-    const response = await fetch(API_CONTACT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        first_name: contactData.firstName,
-        last_name: contactData.lastName,
-        mobile_number: contactData.mobileNumber,
-        email: contactData.email,
-        address: contactData.address,
-        street: contactData.street,
-        country: contactData.country,
-        state: contactData.state,
-        image: contactData.image,
-      }),
-    });
-
-    if (!response.ok) {
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.error || `HTTP error! status: ${response.status}`
-        );
-      } else {
-        const errorText = await response.text();
-        throw new Error(
-          `Server error (${response.status}). Please check the server logs.`
-        );
-      }
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error adding contact:", error);
-    throw error;
-  }
-}
-
-// Update existing contact via API
-async function updateContactInAPI(originalMobile, contactData) {
-  try {
-    const response = await fetch(`${API_CONTACT_URL}/${originalMobile}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        first_name: contactData.firstName,
-        last_name: contactData.lastName,
-        mobile_number: contactData.mobileNumber,
-        email: contactData.email,
-        address: contactData.address,
-        street: contactData.street,
-        country: contactData.country,
-        state: contactData.state,
-        image: contactData.image,
-      }),
-    });
-
-    if (!response.ok) {
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.error || `HTTP error! status: ${response.status}`
-        );
-      } else {
-        const errorText = await response.text();
-        throw new Error(
-          `Server error (${response.status}). Please check the server logs.`
-        );
-      }
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error updating contact:", error);
-    throw error;
-  }
-}
-
-// Delete contact via API
-async function deleteContactFromAPI(mobileNumber) {
-  try {
-    const response = await fetch(`${API_CONTACT_URL}/${mobileNumber}`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        errorData.error || `HTTP error! status: ${response.status}`
-      );
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error deleting contact:", error);
-    throw error;
-  }
-}
-
-// Render contacts in the list
-function renderContacts() {
+// Render contact list
+function renderContacts(contactsToRender) {
   const contactList = document.getElementById("contact-list");
 
-  if (filteredContacts.length === 0) {
+  if (contactsToRender.length === 0) {
     contactList.innerHTML = '<div class="empty-state">No contacts found</div>';
     return;
   }
 
-  const contactsHTML = filteredContacts
-    .map((contact) => {
-      const fullName = `${contact.firstName} ${contact.lastName}`.trim();
-      return `
-        <div class="contact-item" onclick="selectContact('${contact.mobileNumber}')">
-          <div class="contact-info">
-            <h2 class="font-md font-weight-md">${fullName}</h2>
-            <p class="font-sm text-gray">${contact.mobileNumber}</p>
-          </div>
-          <div class="contact-actions" onclick="event.stopPropagation()">
-          <img src="./assets/edit.png" alt="Edit" class="icon pointer" onclick="editSelectedContact()" />
-            <img src="./assets/waste.svg" alt="Delete" class="icon pointer" onclick="deleteContact('${contact.mobileNumber}')" />
-          </div>
+  const html = contactsToRender.map(contact => {
+    const fullName = `${contact.firstName} ${contact.lastName}`.trim();
+    return `
+      <div class="contact-item" onclick="selectContact('${contact.mobileNumber}')">
+        <div class="contact-info">
+          <h2 class="font-md font-weight-md">${fullName}</h2>
+          <p class="font-sm text-gray">${contact.mobileNumber}</p>
         </div>
-      `;
-    })
-    .join("");
+        <div class="contact-actions" onclick="event.stopPropagation()">
+          <img src="./assets/edit.png" alt="Edit" class="icon pointer" onclick="editContact('${contact.mobileNumber}')" />
+          <img src="./assets/waste.svg" alt="Delete" class="icon pointer" onclick="deleteContact('${contact.mobileNumber}')" />
+        </div>
+      </div>
+    `;
+  }).join("");
 
-  contactList.innerHTML = contactsHTML;
+  contactList.innerHTML = html;
 }
 
-// Filter contacts based on search
-function filterContacts(searchTerm) {
-  if (!searchTerm.trim()) {
-    filteredContacts = [...contacts];
-  } else {
-    const term = searchTerm.toLowerCase();
-    filteredContacts = contacts.filter(
-      (contact) =>
-        contact.firstName.toLowerCase().includes(term) ||
-        contact.lastName.toLowerCase().includes(term) ||
-        contact.mobileNumber.includes(term)
-    );
-  }
-  renderContacts();
+// Search contacts
+function searchContacts(searchTerm) {
+  const term = searchTerm.toLowerCase();
+  const filtered = contacts.filter(contact =>
+    contact.firstName.toLowerCase().includes(term) ||
+    contact.lastName.toLowerCase().includes(term) ||
+    contact.mobileNumber.includes(term)
+  );
+  renderContacts(filtered);
 }
 
-// Select and load detailed contact information
+// Select and show contact details
 async function selectContact(mobileNumber) {
   try {
-    const contactDetails = document.getElementById("contact-details");
-    contactDetails.innerHTML =
-      '<div class="loading-details">Loading contact details...</div>';
+    document.getElementById("contact-details").innerHTML = '<div class="loading-details">Loading...</div>';
 
-    const response = await fetch(`${API_CONTACT_URL}/${mobileNumber}`);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const contactData = await response.json();
-    selectedContact = contactData;
-    renderContactDetails(contactData);
+    const response = await fetch(`${API_BASE}/contact/${mobileNumber}`);
+    const contact = await response.json();
+    
+    selectedContact = contact;
+    showContactDetails(contact);
   } catch (error) {
     console.error("Error loading contact details:", error);
-    document.getElementById("contact-details").innerHTML =
-      '<div class="no-contact-selected"><p class="text-gray">Select a contact to view details</p></div>';
+    document.getElementById("contact-details").innerHTML = '<div class="no-contact-selected"><p class="text-gray">Select a contact to view details</p></div>';
   }
 }
 
-// Render detailed contact information
-function renderContactDetails(contact) {
+// Show contact details
+function showContactDetails(contact) {
   const fullName = `${contact.first_name} ${contact.last_name || ""}`.trim();
-  const initials = `${contact.first_name.charAt(0)}${
-    contact.last_name ? contact.last_name.charAt(0) : ""
-  }`.toUpperCase();
+  
+  const addressLine1 = [contact.street_1, contact.state].filter(part => part && part.trim() !== "").join(", ");
+  const addressLine2 = [contact.street_2, contact.country].filter(part => part && part.trim() !== "").join(", ");
 
-  // Format address in one line
-  const addressParts = [
-    contact.address,
-    contact.street,
-    contact.state,
-    contact.country,
-  ].filter((part) => part && part.trim() !== "");
-
-  const addressLine =
-    addressParts.length > 0 ? addressParts.join(", ") : "No address available";
-
-  const detailsHTML = `
+  const html = `
     <div class="contact-detail-card">
       <div class="contact-profile-image">
-        ${
-          contact.image
-            ? `<img src="${contact.image}" alt="${fullName}">`
-            : initials
-        }
+        <img src="${contact.image || './assets/dummy.jpg'}" alt="${fullName}" />
       </div>
       
       <div class="contact-name">${fullName}</div>
@@ -253,112 +114,101 @@ function renderContactDetails(contact) {
       <div class="contact-phone">${contact.mobile_number}</div>
       
       <div class="contact-address-section">
-        <div class="address-line ${addressParts.length === 0 ? "empty" : ""}">
-          ${addressLine}
+        <div class="address-line-container">
+          <div class="address-line">${addressLine1 || "No address available"}</div>
+          <button class="edit-btn" onclick="editContact('${contact.mobile_number}')">
+            <img src="./assets/edit.png" alt="Edit" class="icon" />
+          </button>
         </div>
+        ${addressLine2 ? `
+        <div class="address-line-container">
+          <div class="address-line">${addressLine2}</div>
+          <button class="edit-btn" onclick="editContact('${contact.mobile_number}')">
+            <img src="./assets/edit.png" alt="Edit" class="icon" />
+          </button>
+        </div>
+        ` : ''}
       </div>
-
-      <button class="edit-contact-btn" onclick="editSelectedContact()">
-        <img src="./assets/icons8-edit-48.png"/>
-      </button>
     </div>
   `;
 
-  document.getElementById("contact-details").innerHTML = detailsHTML;
+  document.getElementById("contact-details").innerHTML = html;
 }
 
-// Edit the currently selected contact
-function editSelectedContact() {
-  if (!selectedContact) return;
+// Show add modal
+function showAddModal() {
+  originalMobileNumber = null;
+  document.getElementById("modal-title").textContent = "Add Contact";
+  document.getElementById("contact-form").reset();
+  setDefaultImageForForm();
+  document.getElementById("contact-modal").style.display = "flex";
+}
 
-  originalMobileNumber = selectedContact.mobile_number;
+// Edit contact
+function editContact(mobileNumber) {
+  const contact = contacts.find(c => c.mobileNumber === mobileNumber);
+  if (!contact) return;
+
+  originalMobileNumber = mobileNumber;
   document.getElementById("modal-title").textContent = "Edit Contact";
-
+  
   const form = document.getElementById("contact-form");
-  form.firstName.value = selectedContact.first_name;
-  form.lastName.value = selectedContact.last_name || "";
-  form.mobileNumber.value = selectedContact.mobile_number;
-  form.email.value = selectedContact.email || "";
-  form.address.value = selectedContact.address || "";
-  form.street.value = selectedContact.street || "";
-  form.country.value = selectedContact.country || "";
-  form.state.value = selectedContact.state || "";
+  form.firstName.value = contact.firstName;
+  form.lastName.value = contact.lastName;
+  form.mobileNumber.value = contact.mobileNumber;
+  form.email.value = contact.email;
+  form.Street_1.value = contact.street_1;
+  form.Street_2.value = contact.street_2;
+  form.State.value = contact.state;
+  form.country.value = contact.country;
 
-  // Set image preview if contact has image
-  if (selectedContact.image) {
-    selectedImageUrl = selectedContact.image;
-    document.getElementById(
-      "image-preview"
-    ).innerHTML = `<img src="${selectedContact.image}" alt="Preview">`;
+  if (contact.image) {
+    selectedImageUrl = contact.image;
+    document.getElementById("image-preview").innerHTML = `<img src="${contact.image}" alt="Preview">`;
   } else {
-    clearImagePreview();
+    setDefaultImageForForm();
   }
 
   document.getElementById("contact-modal").style.display = "flex";
 }
 
-// Convert file to Base64
-function convertToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
+// Save contact (add or update)
+async function saveContact(contactData) {
+  try {
+    const url = originalMobileNumber ? `${API_BASE}/contact/${originalMobileNumber}` : `${API_BASE}/contact`;
+    const method = originalMobileNumber ? "PUT" : "POST";
 
-// Handle image upload
-function handleImageUpload() {
-  const imageInput = document.getElementById("image-input");
+    const response = await fetch(url, {
+      method: method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        first_name: contactData.firstName,
+        last_name: contactData.lastName,
+        mobile_number: contactData.mobileNumber,
+        email: contactData.email,
+        street_1: contactData.street_1,
+        street_2: contactData.street_2,
+        state: contactData.state,
+        country: contactData.country,
+        image: contactData.image,
+      }),
+    });
 
-  imageInput.addEventListener("change", async function (e) {
-    const file = e.target.files[0];
-    if (file) {
-      try {
-        // Check file size (limit to 5MB)
-        const maxSize = 5 * 1024 * 1024;
-        if (file.size > maxSize) {
-          alert(
-            "Image size should be less than 5MB. Please choose a smaller image."
-          );
-          e.target.value = "";
-          return;
-        }
-
-        selectedImageUrl = await convertToBase64(file);
-        document.getElementById(
-          "image-preview"
-        ).innerHTML = `<img src="${selectedImageUrl}" alt="Preview">`;
-      } catch (error) {
-        console.error("Error converting image to base64:", error);
-        alert("Failed to process image. Please try again.");
-        e.target.value = "";
-      }
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to save contact");
     }
-  });
-}
 
-// Clear image preview
-function clearImagePreview() {
-  selectedImageUrl = null;
-  document.getElementById("image-preview").innerHTML =
-    '<span id="preview-initials">+</span>';
-  document.getElementById("image-input").value = "";
-}
+    await loadContacts();
+    closeModal();
 
-// Modal functions
-function showAddModal() {
-  originalMobileNumber = null;
-  document.getElementById("modal-title").textContent = "Add Contact";
-  document.getElementById("contact-form").reset();
-  clearImagePreview();
-  document.getElementById("contact-modal").style.display = "flex";
-}
-
-function closeModal() {
-  document.getElementById("contact-modal").style.display = "none";
-  clearImagePreview();
-  originalMobileNumber = null;
+    if (originalMobileNumber && contactData.mobileNumber !== originalMobileNumber) {
+      setTimeout(() => selectContact(contactData.mobileNumber), 100);
+    }
+  } catch (error) {
+    console.error("Error saving contact:", error);
+    alert(`Failed to save contact: ${error.message}`);
+  }
 }
 
 // Delete contact
@@ -366,14 +216,20 @@ async function deleteContact(mobileNumber) {
   if (!confirm("Are you sure you want to delete this contact?")) return;
 
   try {
-    await deleteContactFromAPI(mobileNumber);
+    const response = await fetch(`${API_BASE}/contact/${mobileNumber}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to delete contact");
+    }
+
     await loadContacts();
 
-    // Clear contact details if the deleted contact was currently selected
     if (selectedContact && selectedContact.mobile_number === mobileNumber) {
       selectedContact = null;
-      document.getElementById("contact-details").innerHTML =
-        '<div class="no-contact-selected"><p class="text-gray">Select a contact to view details</p></div>';
+      document.getElementById("contact-details").innerHTML = '<div class="no-contact-selected"><p class="text-gray">Select a contact to view details</p></div>';
     }
   } catch (error) {
     console.error("Error deleting contact:", error);
@@ -381,82 +237,81 @@ async function deleteContact(mobileNumber) {
   }
 }
 
+// Close modal
+function closeModal() {
+  document.getElementById("contact-modal").style.display = "none";
+  setDefaultImageForForm();
+  originalMobileNumber = null;
+}
+
+// Set default image for form (only shows + placeholder)
+function setDefaultImageForForm() {
+  selectedImageUrl = null;
+  document.getElementById("image-preview").innerHTML = '<span id="preview-initials">+</span>';
+  document.getElementById("image-input").value = "";
+}
+
+// Handle image upload
+function handleImageUpload(file) {
+  if (file.size > 5 * 1024 * 1024) {
+    alert("Image size should be less than 5MB");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    selectedImageUrl = e.target.result;
+    document.getElementById("image-preview").innerHTML = `<img src="${selectedImageUrl}" alt="Preview">`;
+  };
+  reader.readAsDataURL(file);
+}
+
 // Setup event listeners
 function setupEventListeners() {
   // Add contact button
-  document
-    .getElementById("add-contact")
-    .addEventListener("click", showAddModal);
+  document.getElementById("add-contact").addEventListener("click", showAddModal);
 
-  // Search functionality
-  document
-    .getElementById("search-input")
-    .addEventListener("input", function (e) {
-      filterContacts(e.target.value);
-    });
+  // Search input
+  document.getElementById("search-input").addEventListener("input", function(e) {
+    searchContacts(e.target.value);
+  });
 
   // Form submission
-  document
-    .getElementById("contact-form")
-    .addEventListener("submit", async function (e) {
-      e.preventDefault();
+  document.getElementById("contact-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    const contactData = {
+      firstName: formData.get("firstName"),
+      lastName: formData.get("lastName") || "",
+      mobileNumber: formData.get("mobileNumber"),
+      email: formData.get("email") || "",
+      street_1: formData.get("Street_1") || "",
+      street_2: formData.get("Street_2") || "",
+      state: formData.get("State") || "",
+      country: formData.get("country") || "",
+      image: selectedImageUrl || "",
+    };
 
-      const formData = new FormData(e.target);
-      const contactData = {
-        firstName: formData.get("firstName"),
-        lastName: formData.get("lastName") || "",
-        mobileNumber: formData.get("mobileNumber"),
-        email: formData.get("email") || "",
-        address: formData.get("address") || "",
-        street: formData.get("street") || "",
-        country: formData.get("country") || "",
-        state: formData.get("state") || "",
-        image: selectedImageUrl || "",
-      };
+    saveContact(contactData);
+  });
 
-      try {
-        if (originalMobileNumber) {
-          // Update existing contact
-          await updateContactInAPI(originalMobileNumber, contactData);
-          await loadContacts();
-
-          // Re-select contact with updated mobile number
-          const updatedMobileNumber = contactData.mobileNumber;
-          setTimeout(() => selectContact(updatedMobileNumber), 100);
-        } else {
-          // Add new contact
-          await addContactToAPI(contactData);
-          await loadContacts();
-        }
-
-        closeModal();
-      } catch (error) {
-        console.error("Error saving contact:", error);
-        alert(`Failed to save contact: ${error.message}`);
-      }
-    });
-
-  // Initialize image upload functionality
-  handleImageUpload();
+  // Image upload
+  document.getElementById("image-input").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (file) handleImageUpload(file);
+  });
 
   // Modal close buttons
-  document
-    .getElementById("modal-cancel-btn")
-    .addEventListener("click", closeModal);
-
-  // Close modal when clicking on overlay
-  document
-    .getElementById("contact-modal")
-    .addEventListener("click", function (e) {
-      if (e.target === this) {
-        closeModal();
-      }
-    });
+  document.getElementById("modal-cancel-btn").addEventListener("click", closeModal);
+  
+  // Close modal on overlay click
+  document.getElementById("contact-modal").addEventListener("click", function(e) {
+    if (e.target === this) closeModal();
+  });
 
   // Close modal with Escape key
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
-      closeModal();
-    }
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") closeModal();
   });
 }

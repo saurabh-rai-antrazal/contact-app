@@ -13,11 +13,8 @@
       >
         <nav class="flex justify-space-between align-center">
           <h1 class="font-lg">Contact App</h1>
-          <button
-            class="circle-button font-xl bg-blue border-radius-full border-none text-white pointer"
-            id="add-contact"
-          >
-            +
+          <button class="add-contact-btn" id="add-contact">
+            <img src="./assets/add.png" />
           </button>
         </nav>
 
@@ -25,7 +22,7 @@
           <div class="left-panel border-blue">
             <div class="search-container">
               <div class="searchbar flex px-sm align-center border-bottom-sm">
-                <img src="./assets/search.svg" alt="Search" class="icon">
+                <img src="./assets/search.svg" alt="Search" class="icon" />
                 <input
                   class="w-full border-none pl-sm font-md"
                   type="text"
@@ -55,6 +52,7 @@
     <div
       class="modal-overlay flex justify-center align-center h-full-view"
       id="contact-modal"
+      style="display: none"
     >
       <div class="modal bg-white border-radius-md p-lg">
         <div class="mb-lg">
@@ -118,18 +116,20 @@
 
           <div class="flex" style="gap: 0.75rem">
             <div class="form-group">
+              <label class="form-label">Address 1</label>
               <input
                 type="text"
-                name="address"
-                placeholder="Address"
+                name="Street_1"
+                placeholder="Street 1"
                 class="form-input border-radius-md text"
               />
             </div>
             <div class="form-group">
+              <label class="form-label">Address 2</label>
               <input
                 type="text"
-                name="street"
-                placeholder="Street"
+                name="Street_2"
+                placeholder="Street 2"
                 class="form-input border-radius-md text"
               />
             </div>
@@ -139,7 +139,7 @@
             <div class="form-group">
               <input
                 type="text"
-                name="state"
+                name="State"
                 placeholder="State"
                 class="form-input border-radius-md text"
               />
@@ -154,57 +154,6 @@
             </div>
           </div>
 
-          <div class="flex justify-end" style="gap: 0.75rem; margin-top: 1rem">
-            <button
-              type="button"
-              class="btn btn-cancel text-blue border-none border-radius-md pointer"
-              id="modal-cancel-btn"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="btn btn-save bg-blue text-white border-none border-radius-md pointer"
-            >
-              Save
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <div
-      class="modal-overlay flex justify-center align-center h-full-view"
-      id="contact-modal"
-    >
-      <div class="modal bg-white border-radius-md p-lg">
-        <div class="mb-lg">
-          <h2 class="font-lg font-weight-bold text-dark" id="modal-title">
-            Edit Address
-          </h2>
-        </div>
-
-        <form class="flex flex-column" style="gap: 0.75rem" id="address-form">
-
-          <div class="form-group">
-            <input
-              type="text"
-              name="street"
-              placeholder="Street"
-              class="form-input border-radius-md text"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <input
-              type="text"
-              name="city"
-              placeholder="City"
-              class="form-input border-radius-md text"
-              required
-            />
-          </div>
           <div class="flex justify-end" style="gap: 0.75rem; margin-top: 1rem">
             <button
               type="button"
