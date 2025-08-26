@@ -7,13 +7,11 @@ export const getContacts = async (req, res) => {
     const contacts = await contactRepo.contactList();
     res.status(200).json(contacts);
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        success: "false",
-        error: stmt.FAILED_TO_FETCH_CONTACTS,
-        details: err.message,
-      });
+    res.status(500).json({
+      success: "false",
+      error: stmt.FAILED_TO_FETCH_CONTACTS,
+      details: err.message,
+    });
   }
 };
 
@@ -47,8 +45,6 @@ export const addNewContact = async (req, res) => {
       country,
       image,
     } = req.body;
-
-    console.log(req.body);
 
     // Basic validation
     if (!first_name || !mobile_number) {
@@ -84,8 +80,9 @@ export const addNewContact = async (req, res) => {
       message: stmt.CONTACT_ADDED_SUCCESSFULLY,
     });
   } catch (err) {
-    console.error("Add contact error:", err);
-    res.status(500).json({ success: "false", error: stmt.FAILED_TO_ADD_CONTACT });
+    res
+      .status(500)
+      .json({ success: "false", error: stmt.FAILED_TO_ADD_CONTACT });
   }
 };
 
@@ -142,7 +139,6 @@ export const updateContactInfo = async (req, res) => {
       .status(200)
       .json({ success: "true", message: stmt.CONTACT_UPDATED_SUCCESSFULLY });
   } catch (err) {
-    console.error("Update contact error:", err);
     res
       .status(500)
       .json({ success: "false", error: stmt.FAILED_TO_UPDATE_CONTACT });
@@ -167,7 +163,6 @@ export const deleteContact = async (req, res) => {
       .status(200)
       .json({ success: "true", message: stmt.CONTACT_DELETED_SUCCESSFULLY });
   } catch (err) {
-    console.error("Delete contact error:", err);
     res
       .status(500)
       .json({ success: "false", error: stmt.FAILED_TO_DELETE_CONTACT });
