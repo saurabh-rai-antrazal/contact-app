@@ -3,6 +3,7 @@ let contacts = [];
 let selectedContact = null;
 let originalMobileNumber = null;
 let selectedImageUrl = null;
+let editMode = 'full';
 
 // API URLs
 const API_BASE = "http://localhost:4000/api";
@@ -12,6 +13,11 @@ document.addEventListener("DOMContentLoaded", function () {
   loadContacts();
   setupEventListeners();
 });
+
+// input formatter
+function inputFormatter(ip){
+  return ip.split(" ").filter((v) => v.trim()).join(" ");
+}
 
 // Load all contacts
 async function loadContacts() {
@@ -114,17 +120,18 @@ function showContactDetails(contact) {
       <div class="contact-phone">${contact.mobile_number}</div>
       
       <div class="contact-address-section">
-        <div class="address-line-container">
+      
+        <div class="flex justify-space-between">
           <div class="address-line">${addressLine1 || "No address available"}</div>
-          <button class="edit-btn" onclick="editContact('${contact.mobile_number}')">
-            <img src="./assets/edit.png" alt="Edit" class="icon" />
+          <button class="border-none bg-white" onclick="editContactPartial('${contact.mobile_number}', 'address1')">
+            <img src="./assets/edit.png" alt="Edit Address 1" class="icon" />
           </button>
         </div>
         ${addressLine2 ? `
-        <div class="address-line-container">
+        <div class="flex justify-space-between">
           <div class="address-line">${addressLine2}</div>
-          <button class="edit-btn" onclick="editContact('${contact.mobile_number}')">
-            <img src="./assets/edit.png" alt="Edit" class="icon" />
+          <button class="border-none bg-white" onclick="editContactPartial('${contact.mobile_number}', 'address2')">
+            <img src="./assets/edit.png" alt="Edit Address 2" class="icon" />
           </button>
         </div>
         ` : ''}
@@ -138,20 +145,49 @@ function showContactDetails(contact) {
 // Show add modal
 function showAddModal() {
   originalMobileNumber = null;
+  editMode = 'full';
   document.getElementById("modal-title").textContent = "Add Contact";
   document.getElementById("contact-form").reset();
   setDefaultImageForForm();
+  enableAllFormFields();
   document.getElementById("contact-modal").style.display = "flex";
 }
 
-// Edit contact
+// Edit contact (full edit)
 function editContact(mobileNumber) {
   const contact = contacts.find(c => c.mobileNumber === mobileNumber);
   if (!contact) return;
 
   originalMobileNumber = mobileNumber;
+  editMode = 'full';
   document.getElementById("modal-title").textContent = "Edit Contact";
   
+  populateForm(contact);
+  enableAllFormFields();
+  document.getElementById("contact-modal").style.display = "flex";
+}
+
+// Edit contact partially (address fields only)
+function editContactPartial(mobileNumber, mode) {
+  const contact = contacts.find(c => c.mobileNumber === mobileNumber);
+  if (!contact) return;
+
+  originalMobileNumber = mobileNumber;
+  editMode = mode;
+  
+  if (mode === 'address1') {
+    document.getElementById("modal-title").textContent = "Edit Address 1";
+  } else if (mode === 'address2') {
+    document.getElementById("modal-title").textContent = "Edit Address 2";
+  }
+  
+  populateForm(contact);
+  setFormFieldsForPartialEdit(mode);
+  document.getElementById("contact-modal").style.display = "flex";
+}
+
+// Populate form with contact data
+function populateForm(contact) {
   const form = document.getElementById("contact-form");
   form.firstName.value = contact.firstName;
   form.lastName.value = contact.lastName;
@@ -168,20 +204,64 @@ function editContact(mobileNumber) {
   } else {
     setDefaultImageForForm();
   }
+}
 
-  document.getElementById("contact-modal").style.display = "flex";
+// Enable all form fields
+function enableAllFormFields() {
+  const form = document.getElementById("contact-form");
+  const inputs = form.querySelectorAll('input');
+  const imageUploadSection = document.querySelector('.image-upload-section');
+  
+  inputs.forEach(input => {
+    input.disabled = false;
+    input.style.opacity = '1';
+    input.style.cursor = 'text';
+  });
+  
+  imageUploadSection.style.pointerEvents = 'auto';
+  imageUploadSection.style.opacity = '1';
+}
+
+// Set form fields for partial editing
+function setFormFieldsForPartialEdit(mode) {
+  const form = document.getElementById("contact-form");
+  const inputs = form.querySelectorAll('input');
+  const imageUploadSection = document.querySelector('.image-upload-section');
+  
+  // Disable image upload for partial edits
+  imageUploadSection.style.pointerEvents = 'none';
+  imageUploadSection.style.opacity = '0.5';
+  
+  inputs.forEach(input => {
+    const fieldName = input.name;
+    let shouldEnable = false;
+    
+    if (mode === 'address1') {
+      shouldEnable = (fieldName === 'Street_1' || fieldName === 'State');
+    } else if (mode === 'address2') {
+      shouldEnable = (fieldName === 'Street_2' || fieldName === 'country');
+    }
+    
+    if (shouldEnable) {
+      input.disabled = false;
+      input.style.opacity = '1';
+      input.style.cursor = 'text';
+    } else {
+      input.disabled = true;
+      input.style.opacity = '0.5';
+      input.style.cursor = 'not-allowed';
+    }
+  });
 }
 
 // Save contact (add or update)
 async function saveContact(contactData) {
   try {
-    const url = originalMobileNumber ? `${API_BASE}/contact/${originalMobileNumber}` : `${API_BASE}/contact`;
-    const method = originalMobileNumber ? "PUT" : "POST";
-
-    const response = await fetch(url, {
-      method: method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    let dataToSend;
+    
+    if (editMode === 'full' || !originalMobileNumber) {
+      // Full save for new contacts or full edits
+      dataToSend = {
         first_name: contactData.firstName,
         last_name: contactData.lastName,
         mobile_number: contactData.mobileNumber,
@@ -191,7 +271,38 @@ async function saveContact(contactData) {
         state: contactData.state,
         country: contactData.country,
         image: contactData.image,
-      }),
+      };
+    } else {
+      // Partial save - only send changed fields
+      const existingContact = contacts.find(c => c.mobileNumber === originalMobileNumber);
+      dataToSend = {
+        first_name: existingContact.firstName,
+        last_name: existingContact.lastName,
+        mobile_number: existingContact.mobileNumber,
+        email: existingContact.email,
+        street_1: existingContact.street_1,
+        street_2: existingContact.street_2,
+        state: existingContact.state,
+        country: existingContact.country,
+        image: existingContact.image,
+      };
+      
+      if (editMode === 'address1') {
+        dataToSend.street_1 = contactData.street_1;
+        dataToSend.state = contactData.state;
+      } else if (editMode === 'address2') {
+        dataToSend.street_2 = contactData.street_2;
+        dataToSend.country = contactData.country;
+      }
+    }
+
+    const url = originalMobileNumber ? `${API_BASE}/contact/${originalMobileNumber}` : `${API_BASE}/contact`;
+    const method = originalMobileNumber ? "PUT" : "POST";
+
+    const response = await fetch(url, {
+      method: method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dataToSend),
     });
 
     if (!response.ok) {
@@ -201,10 +312,10 @@ async function saveContact(contactData) {
 
     await loadContacts();
     closeModal();
-
-    if (originalMobileNumber && contactData.mobileNumber !== originalMobileNumber) {
-      setTimeout(() => selectContact(contactData.mobileNumber), 100);
-    }
+    
+    // Clear contact details after editing
+    selectedContact = null;
+    document.getElementById("contact-details").innerHTML = '<div class="no-contact-selected"><p class="text-gray">Select a contact to view details</p></div>';
   } catch (error) {
     console.error("Error saving contact:", error);
     alert(`Failed to save contact: ${error.message}`);
@@ -242,9 +353,9 @@ function closeModal() {
   document.getElementById("contact-modal").style.display = "none";
   setDefaultImageForForm();
   originalMobileNumber = null;
+  editMode = 'full';
 }
 
-// Set default image for form (only shows + placeholder)
 function setDefaultImageForForm() {
   selectedImageUrl = null;
   document.getElementById("image-preview").innerHTML = '<span id="preview-initials">+</span>';
@@ -253,8 +364,16 @@ function setDefaultImageForForm() {
 
 // Handle image upload
 function handleImageUpload(file) {
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+  if (!allowedTypes.includes(file.type.toLowerCase())) {
+    alert("Only JPG, JPEG, and PNG images are allowed");
+    document.getElementById("image-input").value = "";
+    return;
+  }
+
   if (file.size > 5 * 1024 * 1024) {
     alert("Image size should be less than 5MB");
+    document.getElementById("image-input").value = "";
     return;
   }
 

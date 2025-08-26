@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="./style.css" />
     <title>Contact App</title>
   </head>
   <body>
@@ -80,6 +80,7 @@
                 type="text"
                 name="firstName"
                 placeholder="First name"
+                oninput="this.value = this.value.replace(/[^a-zA-Z ]/g, '')"
                 class="form-input border-radius-md text"
                 required
               />
@@ -88,6 +89,7 @@
               <input
                 type="text"
                 name="lastName"
+                oninput="this.value = this.value.replace(/[^a-zA-Z ]/g, '')"
                 placeholder="Last name"
                 class="form-input border-radius-md text"
               />
@@ -99,7 +101,10 @@
               type="tel"
               name="mobileNumber"
               placeholder="Phone number"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '')"
               class="form-input border-radius-md text"
+              maxlength="10"
+              minlength="10"
               required
             />
           </div>
@@ -120,8 +125,10 @@
               <input
                 type="text"
                 name="Street_1"
+                oninput="this.value = this.value.replace(/[^a-zA-Z ]/g, '')"
                 placeholder="Street 1"
                 class="form-input border-radius-md text"
+                required
               />
             </div>
             <div class="form-group">
@@ -129,8 +136,10 @@
               <input
                 type="text"
                 name="Street_2"
+                oninput="this.value = this.value.replace(/[^a-zA-Z ]/g, '')"
                 placeholder="Street 2"
                 class="form-input border-radius-md text"
+                required
               />
             </div>
           </div>
@@ -140,16 +149,20 @@
               <input
                 type="text"
                 name="State"
+                oninput="this.value = this.value.replace(/[^a-zA-Z ]/g, '')"
                 placeholder="State"
                 class="form-input border-radius-md text"
+                required
               />
             </div>
             <div class="form-group">
               <input
                 type="text"
                 name="country"
+                oninput="this.value = this.value.replace(/[^a-zA-Z ]/g, '')"
                 placeholder="Country"
                 class="form-input border-radius-md text"
+                required
               />
             </div>
           </div>
@@ -172,7 +185,6 @@
         </form>
       </div>
     </div>
-
-    <script src="script.js"></script>
+    <script src="js/script.js"></script>
   </body>
 </html>

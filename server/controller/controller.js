@@ -1,17 +1,17 @@
 // controller.js
 import contactRepo from "../repo/contactRepo.js";
+import * as stmt from "../utils/const.js";
 
 export const getContacts = async (req, res) => {
   try {
     const contacts = await contactRepo.contactList();
     res.status(200).json(contacts);
   } catch (err) {
-    console.error("Get contacts error:", err);
     res
       .status(500)
       .json({
         success: "false",
-        error: "Failed to fetch contacts",
+        error: stmt.FAILED_TO_FETCH_CONTACTS,
         details: err.message,
       });
   }
@@ -24,13 +24,13 @@ export const getContactByMobile = async (req, res) => {
     if (data.length === 0) {
       return res
         .status(404)
-        .json({ success: "false", error: "Contact not found" });
+        .json({ success: "false", error: stmt.CONTACT_NOT_FOUND });
     }
     res.status(200).json(data[0]);
   } catch (err) {
     res
       .status(500)
-      .json({ success: "false", error: "Failed to fetch contact details" });
+      .json({ success: "false", error: stmt.FAILED_TO_FETCH_CONTACT_DETAILS });
   }
 };
 
@@ -54,7 +54,7 @@ export const addNewContact = async (req, res) => {
     if (!first_name || !mobile_number) {
       return res.status(400).json({
         success: "false",
-        error: "First name and mobile number are required",
+        error: stmt.FIRST_NAME_AND_MOBILE_REQUIRED,
       });
     }
 
@@ -63,7 +63,7 @@ export const addNewContact = async (req, res) => {
     if (existingContact.length > 0) {
       return res.status(409).json({
         success: "false",
-        error: "Contact with this mobile number already exists",
+        error: stmt.CONTACT_ALREADY_EXISTS,
       });
     }
 
@@ -81,11 +81,11 @@ export const addNewContact = async (req, res) => {
 
     res.status(201).json({
       success: "true",
-      message: "Contact added successfully",
+      message: stmt.CONTACT_ADDED_SUCCESSFULLY,
     });
   } catch (err) {
     console.error("Add contact error:", err);
-    res.status(500).json({ success: "false", error: "Failed to add contact" });
+    res.status(500).json({ success: "false", error: stmt.FAILED_TO_ADD_CONTACT });
   }
 };
 
@@ -107,7 +107,7 @@ export const updateContactInfo = async (req, res) => {
     if (!first_name || !mobile_number) {
       return res.status(400).json({
         success: "false",
-        error: "First name and mobile number are required",
+        error: stmt.FIRST_NAME_AND_MOBILE_REQUIRED,
       });
     }
 
@@ -116,7 +116,7 @@ export const updateContactInfo = async (req, res) => {
     if (existingContact.length === 0) {
       return res
         .status(404)
-        .json({ success: "false", error: "Contact not found" });
+        .json({ success: "false", error: stmt.CONTACT_NOT_FOUND });
     }
 
     const result = await contactRepo.updateContact(
@@ -135,17 +135,17 @@ export const updateContactInfo = async (req, res) => {
     if (result.affectedRows === 0) {
       return res
         .status(404)
-        .json({ success: "false", error: "Contact not found" });
+        .json({ success: "false", error: stmt.CONTACT_NOT_FOUND });
     }
 
     res
       .status(200)
-      .json({ success: "true", message: "Contact updated successfully" });
+      .json({ success: "true", message: stmt.CONTACT_UPDATED_SUCCESSFULLY });
   } catch (err) {
     console.error("Update contact error:", err);
     res
       .status(500)
-      .json({ success: "false", error: "Failed to update contact" });
+      .json({ success: "false", error: stmt.FAILED_TO_UPDATE_CONTACT });
   }
 };
 
@@ -158,18 +158,18 @@ export const deleteContact = async (req, res) => {
     if (existingContact.length === 0) {
       return res
         .status(404)
-        .json({ success: "false", error: "Contact not found" });
+        .json({ success: "false", error: stmt.CONTACT_NOT_FOUND });
     }
 
     const result = await contactRepo.deleteContact(mobile);
 
     res
       .status(200)
-      .json({ success: "true", message: "Contact deleted successfully" });
+      .json({ success: "true", message: stmt.CONTACT_DELETED_SUCCESSFULLY });
   } catch (err) {
     console.error("Delete contact error:", err);
     res
       .status(500)
-      .json({ success: "false", error: "Failed to delete contact" });
+      .json({ success: "false", error: stmt.FAILED_TO_DELETE_CONTACT });
   }
 };

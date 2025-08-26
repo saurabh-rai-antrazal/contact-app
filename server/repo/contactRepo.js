@@ -14,9 +14,7 @@ import {
 
 const contactList = async () => {
   const connection = getConnection();
-  console.log("Executing query:", GET_CONTACTS_QRY);
   const [result] = await connection.query(GET_CONTACTS_QRY);
-  console.log("Query result:", result);
   return result;
 };
 
@@ -40,32 +38,14 @@ const addContact = async (
   const connection = getConnection();
 
   try {
-    console.log("Adding contact with params:", {
-      first_name,
-      last_name,
-      mobile_number,
-      email,
-      image,
-    });
-
     // Add contact first
     const [contactResult] = await connection.query(
       ADD_NEW_CONTACT_DETAILS_QRY,
       [first_name, last_name, mobile_number, email, image]
     );
 
-    // console.log("Contact added, result:", contactResult);
-
     // Get the new contact ID and add address
     const contactId = contactResult.insertId;
-    console.log("New contact ID:", contactId);
-    console.log("Adding address with params:", {
-      contactId,
-      street_1,
-      street_2,
-      state,
-      country,
-    });
 
     await connection.query(ADD_ADDRESS_QRY, [
       contactId,
@@ -75,11 +55,8 @@ const addContact = async (
       country,
     ]);
 
-    // console.log("Address added successfully");
     return contactResult;
   } catch (error) {
-    console.error("Error in addContact:", error);
-    throw error;
   }
 };
 

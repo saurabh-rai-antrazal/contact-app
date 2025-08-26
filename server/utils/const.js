@@ -1,6 +1,4 @@
-// Query constants for contact management
-
-// GET queries
+// queries
 export const GET_CONTACTS_QRY = `
   SELECT c.*, a.street_1, a.street_2, a.state, a.country 
   FROM contacts c 
@@ -50,3 +48,18 @@ export const DELETE_CONTACT_QRY = `
 export const DELETE_ADDRESS_QRY = `
   DELETE FROM address WHERE contact_id = ?
 `;
+
+
+// statements
+
+export const FAILED_TO_FETCH_CONTACTS = "Failed to fetch contacts";
+export const CONTACT_NOT_FOUND = "Contact not found";
+export const FAILED_TO_FETCH_CONTACT_DETAILS = "Failed to fetch contact details";
+export const FIRST_NAME_AND_MOBILE_REQUIRED = "First name and mobile number are required";
+export const CONTACT_ALREADY_EXISTS = "Contact with this mobile number already exists";
+export const CONTACT_ADDED_SUCCESSFULLY = "Contact added successfully";
+export const FAILED_TO_ADD_CONTACT = "Failed to add contact";
+export const CONTACT_UPDATED_SUCCESSFULLY = "Contact updated successfully";
+export const FAILED_TO_UPDATE_CONTACT = "Failed to update contact";
+export const CONTACT_DELETED_SUCCESSFULLY = "Contact deleted successfully";
+export const FAILED_TO_DELETE_CONTACT = "Failed to delete contact";
