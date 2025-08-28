@@ -54,3 +54,5 @@ dist/
 ################
 node_modules/
 vendor/
+
+.env
